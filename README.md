@@ -1,4 +1,6 @@
 # Palo Alto Networks - Log file highlighting
+* Release 0.02
+
 Going through log files can be a pain.
 
 The idea behind this repository is to highlight errors within the log files such that time spent troubleshooting can be kept to a minimum.
