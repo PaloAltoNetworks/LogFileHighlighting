@@ -1,0 +1,2 @@
+*.sublime-syntax linguist-detectable=true
+*.sublime-syntax linguist-language=YAML
