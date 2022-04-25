@@ -1,0 +1,130 @@
+%YAML 1.2
+---
+
+# Version:          0.05
+# Author:           Nolan Rumble
+# Last modified:    2022/04/25
+
+# http://www.sublimetext.com/docs/syntax.html
+
+name: PAN - GlobalProtect Logs
+version: 2
+
+file_extensions:
+  - log
+
+scope: PanGPS.log|PanGPA.log
+
+variables:
+  line_prefix: '^\(P\d{1,5}-T\d{1,6}\)'
+  date: '\d{2}\/\d{2}\/\d{2}'
+  time: '\d{2}\:\d{2}\:\d{2}\:\d{3}'
+  log_level: '\bDebug\b|\bError\b|\bInfo\s|\bWarn\s'
+  id: '\(\s{0,4}\d{1,5}\)'
+
+
+contexts:
+  main:
+    - include: PanGP
+
+  PanGP:
+    - include: InitialLogLine
+    - include: GPPortal
+    - include: GPGateway
+    - include: Endpoint
+    - include: PKI
+    - include: CatchAll
+
+
+  InitialLogLine:
+    - match: '({{line_prefix}})({{log_level}})({{id}})\:\s({{date}})\s({{time}})\s'
+      captures:
+        1: support.type
+        2: entity.name.tag
+        3: string.quoted
+        4: string.quoted
+        5: string.quoted
+        6: string.quoted
+
+  GPPortal:
+    - match: 'Portal\s(.*),\suser\s?(.*),\slogonDomain\s?(.*),\ssaved\suser\s?(.*)\s,\spath\s?(.*)'
+      captures:
+        1: string.quoted
+        2: entity.name.constant
+        3: entity.name.constant
+        4: entity.name.constant
+        5: string.quoted
+
+  GP_HIP:
+    # HIP Threads
+    - match: 'HipMissingPatchThread:?|HipCheckThread:?|HipMissingPatchThread:?|CheckHipMissingPatchInOtherProcess\(\):?|CheckHipInOtherProcess\(\):?|HipReportThread:?|SendHipReportNReceive\(\):?'
+      scope: entity.other.attribute-name.localname.xml
+
+    # HIP Logs
+
+
+
+  GPGateway:
+    - include: GP_HIP
+
+    - match: '(Name\s(.*)\s(matches\spattern)\s(.*))|(Hostname\s(.*)\s(matches\ssub\salt\sname)\s(.*))'
+      captures:
+        2: entity.name.constant
+        3: string.quoted
+        6: entity.name.constant
+        7: string.quote
+        8: entity.name.constant
+
+    - match: 'gateway\s(.*)\s\((.*)\),\spriority\=(.*),\sduration\=(\d{1,5}\sms),\sassign\s(.*)\sas\sits\sweight'
+      captures:
+        1: string.quoted
+        2: string.quoted
+        3: entity.name.constant
+        4: string.quoted
+        5: entity.name.constant
+
+  Endpoint:
+    - match: '(File\s(.*)\sdoes\snot\sexist)|(File\sdoes\snot\sexist\.\sFile\:\s(.*))'
+      captures:
+        2: string.quoted
+        4: string.quoted
+      scope: entity.name.tag
+
+    - match: '(Pan\sGlobalProtect\sAgent\sservice\ssucceeded|(CreateService|((S|s)ervice))\s(.*)\ssuccessfully)'
+      scope: string.quoted
+
+
+    - match: 'Failed\sto\sopen\sfile\s(.*)'
+      scope: entity.name.tag
+
+    - match: 'domainsuffix,\sadd\ssuffix\s(.*)'
+      captures:
+        1: string.quoted
+
+  PKI:
+    - match: WINHTTP_CALLBACK_STATUS_FLAG_SECURITY_CHANNEL_ERROR|WINHTTP_CALLBACK_STATUS_FLAG_CERT_REV_FAILED|WINHTTP_CALLBACK_STATUS_FLAG_INVALID_CERT|WINHTTP_CALLBACK_STATUS_FLAG_CERT_REVOKED|WINHTTP_CALLBACK_STATUS_FLAG_INVALID_CA|WINHTTP_CALLBACK_STATUS_FLAG_CERT_CN_INVALID|WINHTTP_CALLBACK_STATUS_FLAG_CERT_DATE_INVALID
+      scope: entity.name.tag
+
+    - match: 'Unable\sto\sverify\sserver\scert\..*'
+      scope: entity.name.tag
+
+  CatchAll:
+    - match: \b(F|f)ailed\b|\b[^->](E|e)rror\b|lastError
+      scope: entity.name.tag
+
+    - match: '\<\=\s'
+      scope: entity.name.tag
+
+    - match: '(?=\<)'
+      push: Packages/XML/XML.sublime-syntax
+      with_prototype:
+        - match: '$'
+          pop: true
+
+
+
+
+
+
+
+

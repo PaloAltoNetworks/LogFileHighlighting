@@ -1,0 +1,47 @@
+%YAML 1.2
+---
+
+# Version:          0.01
+# Author:           Nolan Rumble
+# Last modified:    2022/04/01
+
+# See http://www.sublimetext.com/docs/3/syntax.html
+name: PAN - ADEM Endpoint
+file_extensions:
+  - log
+scope: palo_alto_networks_dem_agent.log|palo_alto_networks_dem_agent.1.log
+
+variables:
+  date: '\d{4}-\d{2}-\d{2}'
+  time: '\d{2}\:\d{2}\:\d{2}.\d{3}'
+  log_level: '\bdebug\b|\berror\b|\binfo\b|\bwarn\b'
+  json_regex: '\{.*\:\{.*\:.*\}\}'
+
+contexts:
+  adem:
+    - match: '\[({{date}})\s({{time}})\]\s\[(default)\]'
+      captures:
+        1: keyword.control.example-c
+        2: keyword.control.example-c
+        3: punctuation.definition.string
+
+    - match: '\s\[info\]\s'
+      scope: keyword.control.example-c
+
+    - match: '\s\[warning\]\s.*'
+      scope: entity.name.constant
+
+    - match: '\s\[error\]\s.*'
+      scope: constant.language.null
+
+
+    - match: '\{'
+      scope: punctuation.section.mapping.begin.json
+      embed: scope:source.json
+      escape: '\}$'
+
+
+  main:
+    - include: adem
+
+
