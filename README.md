@@ -7,7 +7,7 @@ This is my first attempt at trying to use Sublime Text and it's syntax highlight
 
 ## Installing
 ### MacOS
-1. Create a new directory in ```~/Library/Application\ Support/Sublime\ Text\ 3/Packages/```.
+1. Create a new directory in `~/Library/Application\ Support/Sublime\ Text\ 3/Packages/`.
 
 ```bash
 $ mkdir -p ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/Palo\ Alto\ Networks
@@ -15,19 +15,40 @@ $ mkdir -p ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/Palo\ Alto\ 
 
 2. Extract the `*.sublime-syntax` files into this new directory.
 
+### Windows
+1. Create a new directory in `%APPDATA%\Sublime Text 3\Packages`.
+2. For this example, the new directory name is `Palo Alto Networks`.
+3. Extract the `*.sublime-syntax files into this new directory`.
+
 ## Syntax Highlighting Capabilities
 
 ### ADEM Log files
 #### Endpoint logs
 
-| Information |
-|--- |
-| File name | `palo_alto_networks_dem_agent.log` or `palo_alto_networks_dem_agent.1.log` |
+* File name:  `palo_alto_networks_dem_agent.log` or `palo_alto_networks_dem_agent.1.log` 
+To activate:
+1. Click view
+2. Syntax
+3. Palo Alto Networks
+4. `PAN ADEM Endpoint`
 
 #### ION logs
 
+* File name: `adem` or `adem.*`
+To activate:
+1. Click view
+2. Syntax
+3. Palo Alto Networks
+4. `PAN ADEM ION Logs`
 
 ### GlobalProtect Log Files
+
+* File name: `PanGPS.log` or `PanGPA.log`
+To activate:
+1. Click view
+2. Syntax
+3. Palo Alto Networks
+4. `PAN GlobalProtect Logs`
 
 
 ## Reference files
