@@ -22,7 +22,7 @@ $ mkdir -p ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/Palo\ Alto\ 
 
 | Information |
 |--- |
-| File name `palo_alto_networks_dem_agent.log` or `palo_alto_networks_dem_agent.1.log` |
+| File name | `palo_alto_networks_dem_agent.log` or `palo_alto_networks_dem_agent.1.log` |
 
 #### ION logs
 
