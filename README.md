@@ -7,6 +7,11 @@ The idea behind this repository is to highlight errors within the log files such
 
 This is my first attempt at trying to use Sublime Text and it's syntax highlighting feature.
 
+## Example Screenshots
+* ![Example screenshot 1](images/example-highlighting1.png)
+* ![Example screenshot 2](images/example-highlighting2.png)
+
+
 ## Installing
 ### MacOS
 1. Create a new directory in `~/Library/Application\ Support/Sublime\ Text\ 3/Packages/`.
