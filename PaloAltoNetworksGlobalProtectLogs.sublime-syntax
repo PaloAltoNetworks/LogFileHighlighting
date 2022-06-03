@@ -1,13 +1,13 @@
 %YAML 1.2
 ---
 
-# Version:          0.05
-# Author:           Nolan Rumble
-# Last modified:    2022/04/25
-
+# Version:          0.06
+# Author:           Nolan Rumble (TheScriptGuy)
+# Last modified:    2022/06/03
+# GitHub:           https://github.com/PaloAltoNetworks/LogFileHighlighting
 # http://www.sublimetext.com/docs/syntax.html
 
-name: PAN - GlobalProtect Logs
+name: PAN - Global Protect Logs
 version: 2
 
 file_extensions:
@@ -16,28 +16,47 @@ file_extensions:
 scope: PanGPS.log|PanGPA.log
 
 variables:
-  line_prefix: '^\(P\d{1,5}-T\d{1,6}\)'
-  date: '\d{2}\/\d{2}\/\d{2}'
+  line_prefix_win: '^\(P\d{1,5}-T\d{1,6}\)'
+  line_prefix_macos: '^P\d{1,5}-T\d{1,6}\s{0,3}'
+  date_win: '\d{2}\/\d{2}\/\d{2}'
+  date_macos: '\d{2}\/\d{2}\/\d{4}'
   time: '\d{2}\:\d{2}\:\d{2}\:\d{3}'
   log_level: '\bDebug\b|\bError\b|\bInfo\s|\bWarn\s'
   id: '\(\s{0,4}\d{1,5}\)'
-
+  ipv4: '(?:[0-9]{1,3}\.){3}[0-9]{1,3}'
+  ipv6: '([a-f0-9:]+:+)+[a-f0-9]+'
+  interface_names: 'utun\d{1,2}|en\d{1,2}|llw\d{1,2}'
+  great_latency: '1[0-5]\dms|\d{1,2}ms'
+  ok_latency: '[2-3]\d{2}ms|1[7-9]\dms'
+  bad_latency: '\d{4,}ms|[4-9]\d{2}ms'
+  md5: '[a-f0-9]{31,32}'
 
 contexts:
   main:
     - include: PanGP
 
   PanGP:
-    - include: InitialLogLine
+    - include: InitialLogLine_win
+    - include: InitialLogLine_macos
     - include: GPPortal
     - include: GPGateway
     - include: Endpoint
+    - include: network
     - include: PKI
     - include: CatchAll
 
+  InitialLogLine_macos:
+    - match: '({{line_prefix_macos}})\s({{date_macos}})\s({{time}})\s({{log_level}})({{id}}\:)\s'
+      captures:
+        1: support.type
+        2: entity.name.tag
+        3: string.quoted
+        4: string.quoted
+        5: string.quoted
+        6: string.quoted
 
-  InitialLogLine:
-    - match: '({{line_prefix}})({{log_level}})({{id}})\:\s({{date}})\s({{time}})\s'
+  InitialLogLine_win:
+    - match: '(^({{line_prefix_win}})({{log_level}})({{id}})\:\s({{date_win}})\s({{time}})\s)'
       captures:
         1: support.type
         2: entity.name.tag
@@ -57,16 +76,155 @@ contexts:
 
   GP_HIP:
     # HIP Threads
-    - match: 'HipMissingPatchThread:?|HipCheckThread:?|HipMissingPatchThread:?|CheckHipMissingPatchInOtherProcess\(\):?|CheckHipInOtherProcess\(\):?|HipReportThread:?|SendHipReportNReceive\(\):?'
+    - match: 'HipMissingPatchThread:?|HipCheckThread:?|HipMissingPatchThread:?|CheckHipMissingPatchInOtherProcess\(\):?|CheckHipInOtherProcess\(\):?|HipReportThread:?|SendHipReportNReceive\(\):?|Need\sto\scheck\smissing\spatch\.$'
       scope: entity.other.attribute-name.localname.xml
 
+    - match: 'Send\ship\sreport\scheck\sfailed$|SendHipReportToGateway\s(.*)\sreturns\sFALSE\.$'
+      captures:
+        1: constant.numeric.integer
+      scope: entity.name.tag
+
     # HIP Logs
+    - match: 'sent\sHIP\sreport\scheck\sto\s(.*?)\.$'
+      captures:
+        1: entity.name.constant
+      scope: string.quoted
+
+    - match: 'sent\sHIP\sreport\s\sto\s(.*?)$'
+      captures:
+        1: entity.name.constant
+      scope: string.quoted
+
+    - match: 'Response\sstatus\sof\sHIP\sreport\scheck\sis\ssuccess,\sgateway\s(.*?)$'
+      captures:
+        1: entity.name.constant
+      scope: string.quoted
+
+    - match: 'SendHipReportNReceive.*gateway(.*?)$'
+      captures:
+        1: entity.name.constant
+      scope: string.quoted
+
+    - match: 'Hip\sreport\sis\s\sneeded.*gateway(.*?)$'
+      captures:
+        1: entity.name.constant
+      scope: string.quoted
+
+    - match: 'using\shttps\sto\ssend\ship\s.*gateway(.*?)$'
+      captures:
+        1: entity.name.constant
+      scope: string.quoted
+
+    - match: 'Time\sto\ssend\ship\s.*gateway(.*?)$'
+      captures:
+        1: entity.name.constant
+      scope: string.quoted
+
+    - match: 'Gateway\s(.*?):\snow\sis\s(\d{10,}),\snext\ship\schecking\sis\s(\d{1,}),\snext\ship\sreport\scheck\ssending\stime\sis\s(\d{1,}),\slast\ship\sreport\scheck\ssending\stime\sis\s(\d{1,}),\ssending\ship\sdelay\sis\s(\d{1,})\sms'
+      captures:
+        1: entity.name.constant
+        2: entity.name.constant
+        3: entity.name.constant
+        4: entity.name.constant
+        5: entity.name.constant
+        6: entity.name.constant
+      scope: string.quoted
+
+    - match: 'Wait\sfor\s(\d{1,})\sms\sto\ssend.*gateway(.*?)$'
+      captures:
+        1: entity.name.constant
+        2: entity.name.constant
+      scope: string.quoted
+
+    - match: 'Hip\sreport\shead\sto\sgateway\s(.*?)\sis'
+      captures:
+        1: entity.name.constant
+      scope: string.quoted
+
+    - match: 'Last\ship\scheck\sevent\swakeup\stick\sis\s(\d{1,})'
+      captures:
+        1: entity.name.constant
+      scope: string.quoted
+
+    - match: 'SetNextScheduledHipCheckTime\sto\s(\d{1,})'
+      captures:
+        1: entity.name.constant
+      scope: string.quoted
+
+    - match: 'Need\sto\scollect\ship\sdata'
+      scope: string.quoted
+
+    - match: '(PanGpHip)\sstarted\s\.{1,}'
+      captures:
+        1: entity.name.constant
+      scope: string.quoted
+
+    - match: 'Header\sshows\ship\sreport\ssize\sis\s(\d{1,})\.\sszLine\s(\d{1,}),\snRead\s(\d{1,}),\ssizeof\sszLine\s(\d{1,})'
+      captures:
+        1: entity.name.constant
+        2: entity.name.constant
+        3: entity.name.constant
+        4: entity.name.constant
+      scope: string.quoted
+
+    - match: 'Sending\ship\sreport\sdelay.*\sis\s(-?\d{1,})\sseconds'
+      captures:
+        1: entity.name.constant
+      scope: string.quoted
+
+    - match: 'Set\smax\ssending\ship\sreport\sdelay\sto\sdefault\s(\d{1,})\sseconds'
+      captures:
+        1: entity.name.constant
+      scope: string.quoted
+
+    - match: 'HIP\sreport\s(v\d{1,2})\smd5\sdigest\sis\s({{md5}})'
+      captures:
+        1: entity.name.constant
+        2: entity.name.constant
+      scope: string.quoted
+
+    - match: 'Hip\snotification\sis\sempty\s.*$|Hip\sreport\scheck\sreturns\ssuccess\.|v4\ship\sreport\sis\sencoded|write\ship\sfile\snow'
+      scope: string.quoted
 
 
+    - match: '(Send\ship\sreport\sto\sgateway)\s(.*)'
+      captures:
+        1: string.quoted
+        2: constant.numeric.integer
+
+    - match: '(Entering\sSendHipReportToGateway\(\)\.\sGateway\:)\s(.*)$'
+      captures:
+        1: string.quoted
+        2: constant.numeric.integer
+
+
+    - match: 'Gateway\s(.*?),\sresponse\sto\sthe\ship\sreport\s\:'
+      captures:
+        1: constant.numeric.integer
+      scope: string.quoted
+
+    - match: 'Launch\sPanGpHipMp\scmd\:\s(.*)$'
+      captures:
+        1: constant.numeric.integer
+      scope: string.quoted
+
+    - match: '(Response\sstatus\sof\sHIP\sreport\scheck\sis\serror),\sgateway\s(.*)$'
+      captures:
+        1: entity.name.tag
+        2: constant.numeric.integer
+
+
+
+    - match: '(non-success\sstatus\sof\sthe\sHIP\sreport\scheck\sresponse\sfrom\sgateway)\s(.*?),\suser\s(.*?),\sportal\s(.*?),\sclient-ip\s(.*?),\serror\sInvalid\sclient\sip,\smd5'
+      captures:
+        1: entity.name.tag
+        2: constant.numeric.integer
+        3: constant.numeric.integer
+        4: constant.numeric.integer
 
   GPGateway:
     - include: GP_HIP
-
+    - include: GP_Sorting
     - match: '(Name\s(.*)\s(matches\spattern)\s(.*))|(Hostname\s(.*)\s(matches\ssub\salt\sname)\s(.*))'
       captures:
         2: entity.name.constant
@@ -83,7 +241,31 @@ contexts:
         4: string.quoted
         5: entity.name.constant
 
+  GP_Sorting:
+    - match: '\={10,15}\sSorting\sresult\s\={10,15}'
+      push:
+        - meta_scope: string.quoted
+        - include: InitialLogLine_win
+        - include: InitialLogLine_macos
+        - match: '(.*?)\s\t\t({{bad_latency}})'
+          captures:
+            1: entity.name.tag
+            2: entity.name.tag
+        - match: '(.*?)\s\t\t({{ok_latency}})'
+          captures:
+            1: entity.name.constant
+            2: entity.name.constant
+        - match: '\={40}'
+          scope: string.quoted
+          pop: true
+
+      scope: string.quoted
+
   Endpoint:
+    - include: EndpointCookies
+    - include: EndpointOther
+
+  EndpointOther:
     - match: '(File\s(.*)\sdoes\snot\sexist)|(File\sdoes\snot\sexist\.\sFile\:\s(.*))'
       captures:
         2: string.quoted
@@ -93,13 +275,44 @@ contexts:
     - match: '(Pan\sGlobalProtect\sAgent\sservice\ssucceeded|(CreateService|((S|s)ervice))\s(.*)\ssuccessfully)'
       scope: string.quoted
 
-
     - match: 'Failed\sto\sopen\sfile\s(.*)'
       scope: entity.name.tag
+
+    - match: 'agentName\sis\s(.*)$'
+      captures:
+        1: string.quoted
 
     - match: 'domainsuffix,\sadd\ssuffix\s(.*)'
       captures:
         1: string.quoted
+
+  EndpointCookies:
+    - match: 'Delete\s(.*)$'
+      captures:
+        1: constant.numeric.integer
+
+    - match: 'Changed\smode\sof\s(.*)$'
+      captures:
+        1: constant.numeric.integer
+
+    - match: 'Serialized\sportal\suser\sauth\scookie\sto\sfile\s(.*?)\.\s(\d{1,5}\sbytes)'
+      captures:
+        1: constant.numeric.integer
+        2: constant.numeric.integer
+
+    - match: 'Serialize\snon-empty\scookie\sfor\sportal\s(.*?)\sand\spre-logon\suser$'
+      captures:
+        1: constant.numeric.integer
+
+    - match: 'Serialize\snon-empty\scookie\sfor\sportal\s(.*?)\sand\suser\s(.*?)$'
+      captures:
+        1: constant.numeric.integer
+        2: constant.numeric.integer
+
+    - match: 'SerializePortalPrelogonAuthCookie\sto\sfile\s(.*?)$'
+      captures:
+        1: constant.numeric.integer
+
 
   PKI:
     - match: WINHTTP_CALLBACK_STATUS_FLAG_SECURITY_CHANNEL_ERROR|WINHTTP_CALLBACK_STATUS_FLAG_CERT_REV_FAILED|WINHTTP_CALLBACK_STATUS_FLAG_INVALID_CERT|WINHTTP_CALLBACK_STATUS_FLAG_CERT_REVOKED|WINHTTP_CALLBACK_STATUS_FLAG_INVALID_CA|WINHTTP_CALLBACK_STATUS_FLAG_CERT_CN_INVALID|WINHTTP_CALLBACK_STATUS_FLAG_CERT_DATE_INVALID
@@ -108,7 +321,88 @@ contexts:
     - match: 'Unable\sto\sverify\sserver\scert\..*'
       scope: entity.name.tag
 
+    - match: 'SSL\sconnected'
+      scope: string.quoted
+
+    - match: '(SSL\sconnecting\sto)\s({{ipv4}})|(SSL\sverify\ssucceed)'
+      captures:
+        1: string.quoted
+        2: constant.numeric.integer
+      scope: string.quoted
+
+    - match: '(ConnectSSL\:\sFailed\sto\sconnect\sto\s(.*)$)'
+      captures:
+        2: constant.numeric.integer
+      scope: entity.name.tag
+
+    - match: 'ConnectSSL\(.*?\)\sfailed$'
+      scope: entity.name.tag
+
+  network:
+    - match: 'Installing\sinterface\s\.\.\.'
+      scope: string.quoted
+
+    - match: 'Set\stunnel\sinterface\sMTU\sas\s(\d{1,5})'
+      captures:
+        1: constant.numeric.integer
+      scope: string.quoted
+
+    - match: 'Route\schange\smessage\s'
+      push:
+        - meta_scope: string.quoted
+        - match: 'RTM_IFINFO:'
+          push:
+            - meta_scope: string.quoted
+            - match: 'iface\sstatus\schange,\s(.*?)\sdown'
+              captures:
+                1: constant.numeric.integer
+              scope: entity.name.tag
+              pop: true
+            - match: 'iface\sstatus\schange,\s(.*?)\sup'
+              captures:
+                1: constant.numeric.integer
+              scope: string.quoted
+              pop: true
+          pop: true
+        - match: 'RTM_DELADDR:'
+          push:
+            - meta_scope: entity.name.tag
+            - match: 'address\sbeing\sremoved\sfrom\siface'
+              scope: entity.name.tag
+            - match: '{{interface_names}}:'
+              scope: constant.numeric.integer
+            - match: '{{ipv4}}|{{ipv6}}'
+              scope: constant.numeric.integer
+              pop: true
+          pop: true
+        - match: 'RTM_NEWADDR:'
+          push:
+            - meta_scope: string.quoted
+            - match: 'address\sbeing\sadded\sto\siface'
+              scope: string.quoted
+            - match: '{{interface_names}}:'
+              scope: constant.numeric.integer
+              pop: true
+          pop: true
+
+    - match: 'Failed\sto\sconnect\sto\s({{ipv4}})\son\s(\d{1,5})\swith\sreturn\svalue\s-(\d{1,3})\sand\ssocket\serror\s\d{1,5}(\(.*\))'
+      captures:
+        1: constant.numeric.integer
+        2: constant.numeric.integer
+        3: constant.numeric.integer
+        4: entity.name.tag
+      scope: entity.name.tag
+
   CatchAll:
+    - match: '\d{4}-\d{2}-\d{2}\s\d{2}\:\d{2}:\d{2}\s\+\d{4}'
+      scope: constant.numeric.integer
+
+    - match: '{{ipv4}}\.in-addr\.arpa'
+      scope: constant.numeric.integer
+
+    - match: '{{ipv4}}|{{ipv6}}'
+      scope: constant.numeric.integer
+
     - match: \b(F|f)ailed\b|\b[^->](E|e)rror\b|lastError
       scope: entity.name.tag
 
@@ -120,11 +414,3 @@ contexts:
       with_prototype:
         - match: '$'
           pop: true
-
-
-
-
-
-
-
-

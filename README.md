@@ -1,11 +1,24 @@
 # Palo Alto Networks - Log file highlighting
-* Release 0.02
+## Release 0.06
 
 Going through log files can be a pain.
 
 The idea behind this repository is to highlight errors within the log files such that time spent troubleshooting can be kept to a minimum.
 
 This is my first attempt at trying to use Sublime Text and it's syntax highlighting feature.
+
+## Improved features
+### Better Highlighting for:
+* HIP Checks
+* Gateway latency checking 
+| Latency (ms) | Measurement | Color | 
+| 0-170ms | great latency | green |
+| 170-399ms | ok latency | | yellow |
+| >400ms | bad latency| red |
+* PKI entry checking
+* network change highlighting
+* Authentication cookie highlighting
+* IPv4 and IPv6 address highlighting
 
 ## Example Screenshots
 ![Example screenshot 1](images/example-highlighting1.png)
