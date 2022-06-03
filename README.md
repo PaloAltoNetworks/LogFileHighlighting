@@ -14,8 +14,8 @@ This is my first attempt at trying to use Sublime Text and it's syntax highlight
 
 | Latency (ms) | Measurement | Color |
 | ------------ | ----------- | ----- |
-| 0-170ms | great latency | green |
-| 170-399ms | ok latency | yellow |
+| 0 - 169ms | great latency | green |
+| 170 - 399ms | ok latency | yellow |
 | > 400ms | bad latency| red |
 
 * PKI entry checking
