@@ -16,7 +16,7 @@ This is my first attempt at trying to use Sublime Text and it's syntax highlight
 | ------------ | ----------- | ----- |
 | 0-170ms | great latency | green |
 | 170-399ms | ok latency | yellow |
-| >400ms | bad latency| red |
+| > 400ms | bad latency| red |
 
 * PKI entry checking
 * network change highlighting
