@@ -11,7 +11,9 @@ This is my first attempt at trying to use Sublime Text and it's syntax highlight
 ### Better Highlighting for:
 * HIP Checks
 * Gateway latency checking 
-| Latency (ms) | Measurement | Color | 
+
+| Latency (ms) | Measurement | Color |
+| ------------ | ----------- | ----- |
 | 0-170ms | great latency | green |
 | 170-399ms | ok latency | | yellow |
 | >400ms | bad latency| red |
