@@ -47,14 +47,23 @@ $ mkdir -p ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/Palo\ Alto\ 
 
 ### ADEM Log files
 #### Endpoint logs
+#### Release: 0.03
+#### Improved features
+* Better handling of JSON format
+* Better handling of PKI log entries
 
+
+#### File names
 * File name:  `palo_alto_networks_dem_agent.log` or `palo_alto_networks_dem_agent.1.log` 
 
+#### To use in Sublime Text
 To activate:
 1. Click view
 2. Syntax
 3. Palo Alto Networks
 4. `PAN ADEM Endpoint`
+
+
 
 #### ION logs
 

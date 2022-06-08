@@ -1,9 +1,10 @@
 %YAML 1.2
 ---
 
-# Version:          0.01
+# Version:          0.02
 # Author:           Nolan Rumble
-# Last modified:    2022/04/01
+# Last modified:    2022/06/07
+# Github:           https://github.com/PaloAltoNetworks/LogFileHighlighting
 
 # See http://www.sublimetext.com/docs/3/syntax.html
 name: PAN - ADEM Endpoint
@@ -15,33 +16,71 @@ variables:
   date: '\d{4}-\d{2}-\d{2}'
   time: '\d{2}\:\d{2}\:\d{2}.\d{3}'
   log_level: '\bdebug\b|\berror\b|\binfo\b|\bwarn\b'
-  json_regex: '\{.*\:\{.*\:.*\}\}'
+  ipv4: '(?:[0-9]{1,3}\.){3}[0-9]{1,3}'
+  ipv6: '([a-f0-9:]+:+)+[a-f0-9]+'
 
 contexts:
-  adem:
+  LinePrefix:
     - match: '\[({{date}})\s({{time}})\]\s\[(default)\]'
       captures:
         1: keyword.control.example-c
         2: keyword.control.example-c
         3: punctuation.definition.string
 
+  LineInfoSuffix:
+    - match: 'WireProtocolClient\sincoming\smessage\s\[.*\]\swith\spayload:\s'
+
+  LineInfo:
     - match: '\s\[info\]\s'
       scope: keyword.control.example-c
 
+    - include: LineInfoSuffix
+
+  LineWarning:
     - match: '\s\[warning\]\s.*'
       scope: entity.name.constant
 
+  LineError:
     - match: '\s\[error\]\s.*'
       scope: constant.language.null
 
+  PKI:
+    - match: 'Certificate\shas\ssubject\s(.*)\sby issuer\s(.*)\sand\shas\scryptographic\ssignature\sof\s(.*)'
+      captures:
+        1: constant.numeric.value
+        2: string.quoted
+        3: constant.numeric.value
 
-    - match: '\{'
-      scope: punctuation.section.mapping.begin.json
+    - match: 'Loaded\sroot\scertificate,\sit\shas\ssubject\s(.*),\sissuer\s(.*),\sand\ssignature\s(.*)'
+      captures:
+        1: constant.numeric.value
+        2: string.quoted
+        3: constant.numeric.value
+
+    - match: 'A\sclient\scert\shas\sbeen\sprovided\sfor\sthis\sconnection\.\sIt\shas\ssubject\s(.*),\sissuer\s(.*)\sand\ssignature\s(.*)'
+      captures:
+        1: constant.numeric.value
+        2: string.quoted
+        3: constant.numeric.value
+
+  JSON:
+    - match: '\s*(?={|\[)'
+      captures:
+        1: punctuation.definition.json.begin.log
       embed: scope:source.json
-      escape: '\}$'
+      escape: (?=^\[{{date}}\s)  # the date of the next log item
 
+  IPAddresses:
+    - match: '{{ipv4}}|{{ipv6}}'
+      scope: constant.numeric.value
 
   main:
-    - include: adem
+    - include: LinePrefix
+    - include: LineInfo
+    - include: LineWarning
+    - include: LineError
+    - include: PKI
+    - include: JSON
+    - include: IPAddresses
 
 
