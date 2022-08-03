@@ -1,9 +1,9 @@
 %YAML 1.2
 ---
 
-# Version:          0.06
+# Version:          0.07
 # Author:           Nolan Rumble (TheScriptGuy)
-# Last modified:    2022/06/03
+# Last modified:    2022/08/03
 # GitHub:           https://github.com/PaloAltoNetworks/LogFileHighlighting
 # http://www.sublimetext.com/docs/syntax.html
 
@@ -17,7 +17,7 @@ scope: PanGPS.log|PanGPA.log
 
 variables:
   line_prefix_win: '^\(P\d{1,5}-T\d{1,6}\)'
-  line_prefix_macos: '^P\d{1,5}-T\d{1,6}\s{0,3}'
+  line_prefix_macos: '^P\s?\d{1,5}-T\d{1,6}\s{0,3}'
   date_win: '\d{2}\/\d{2}\/\d{2}'
   date_macos: '\d{2}\/\d{2}\/\d{4}'
   time: '\d{2}\:\d{2}\:\d{2}\:\d{3}'

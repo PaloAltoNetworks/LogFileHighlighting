@@ -1,5 +1,5 @@
 # Palo Alto Networks - Log file highlighting
-## Release 0.06
+## Release 0.07
 
 Going through log files can be a pain.
 
@@ -30,16 +30,16 @@ This is my first attempt at trying to use Sublime Text and it's syntax highlight
 
 ## Installing
 ### MacOS
-1. Create a new directory in `~/Library/Application\ Support/Sublime\ Text\ 3/Packages/`.
+1. Create a new directory in `~/Library/Application\ Support/Sublime\ Text/Packages/`.
 
 ```bash
-$ mkdir -p ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/Palo\ Alto\ Networks
+$ mkdir -p ~/Library/Application\ Support/Sublime\ TextPackages/Palo\ Alto\ Networks
 ```
 
 2. Extract the `*.sublime-syntax` files into this new directory.
 
 ### Windows
-1. Create a new directory in `%APPDATA%\Sublime Text 3\Packages`.
+1. Create a new directory in `%APPDATA%\Sublime Text\Packages`.
 2. For this example, the new directory name is `Palo Alto Networks`.
 3. Extract the `*.sublime-syntax` files into this new directory.
 
