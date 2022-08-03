@@ -33,7 +33,7 @@ This is my first attempt at trying to use Sublime Text and it's syntax highlight
 1. Create a new directory in `~/Library/Application\ Support/Sublime\ Text/Packages/`.
 
 ```bash
-$ mkdir -p ~/Library/Application\ Support/Sublime\ TextPackages/Palo\ Alto\ Networks
+$ mkdir -p ~/Library/Application\ Support/Sublime\ Text/Packages/Palo\ Alto\ Networks
 ```
 
 2. Extract the `*.sublime-syntax` files into this new directory.
